@@ -1,0 +1,199 @@
+[gd_scene load_steps=14 format=2]
+
+[ext_resource path="res://person/Person.gd" type="Script" id=1]
+[ext_resource path="res://person/walk_left.png" type="Texture" id=2]
+[ext_resource path="res://person/walk_right.png" type="Texture" id=3]
+[ext_resource path="res://person/throw_begin.png" type="Texture" id=4]
+[ext_resource path="res://person/throw_end.png" type="Texture" id=5]
+
+[sub_resource type="BoxShape" id=1]
+extents = Vector3( 0.617135, 1, 0.516451 )
+
+[sub_resource type="Animation" id=2]
+resource_name = "throw"
+length = 0.8
+loop = true
+tracks/0/type = "value"
+tracks/0/path = NodePath("Frames/WalkLeft:visible")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/keys = {
+"times": PoolRealArray( 0 ),
+"transitions": PoolRealArray( 1 ),
+"update": 1,
+"values": [ false ]
+}
+tracks/1/type = "value"
+tracks/1/path = NodePath("Frames/WalkRight:visible")
+tracks/1/interp = 1
+tracks/1/loop_wrap = true
+tracks/1/imported = false
+tracks/1/enabled = true
+tracks/1/keys = {
+"times": PoolRealArray( 0 ),
+"transitions": PoolRealArray( 1 ),
+"update": 1,
+"values": [ false ]
+}
+tracks/2/type = "value"
+tracks/2/path = NodePath("Frames/ThrowBegin:visible")
+tracks/2/interp = 1
+tracks/2/loop_wrap = true
+tracks/2/imported = false
+tracks/2/enabled = true
+tracks/2/keys = {
+"times": PoolRealArray( 0, 0.4 ),
+"transitions": PoolRealArray( 1, 1 ),
+"update": 1,
+"values": [ true, false ]
+}
+tracks/3/type = "value"
+tracks/3/path = NodePath("Frames/ThrowEnd:visible")
+tracks/3/interp = 1
+tracks/3/loop_wrap = true
+tracks/3/imported = false
+tracks/3/enabled = true
+tracks/3/keys = {
+"times": PoolRealArray( 0, 0.4 ),
+"transitions": PoolRealArray( 1, 1 ),
+"update": 1,
+"values": [ false, true ]
+}
+tracks/4/type = "method"
+tracks/4/path = NodePath(".")
+tracks/4/interp = 1
+tracks/4/loop_wrap = true
+tracks/4/imported = false
+tracks/4/enabled = true
+tracks/4/keys = {
+"times": PoolRealArray( 0.4 ),
+"transitions": PoolRealArray( 1 ),
+"values": [ {
+"args": [  ],
+"method": "throw_metal_ball"
+} ]
+}
+
+[sub_resource type="Animation" id=3]
+resource_name = "walk"
+length = 0.8
+loop = true
+tracks/0/type = "value"
+tracks/0/path = NodePath("Frames/WalkLeft:visible")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/keys = {
+"times": PoolRealArray( 0, 0.4 ),
+"transitions": PoolRealArray( 1, 1 ),
+"update": 1,
+"values": [ true, false ]
+}
+tracks/1/type = "value"
+tracks/1/path = NodePath("Frames/WalkRight:visible")
+tracks/1/interp = 1
+tracks/1/loop_wrap = true
+tracks/1/imported = false
+tracks/1/enabled = true
+tracks/1/keys = {
+"times": PoolRealArray( 0, 0.4 ),
+"transitions": PoolRealArray( 1, 1 ),
+"update": 1,
+"values": [ false, true ]
+}
+tracks/2/type = "value"
+tracks/2/path = NodePath("Frames/ThrowBegin:visible")
+tracks/2/interp = 1
+tracks/2/loop_wrap = true
+tracks/2/imported = false
+tracks/2/enabled = true
+tracks/2/keys = {
+"times": PoolRealArray( 0 ),
+"transitions": PoolRealArray( 1 ),
+"update": 1,
+"values": [ false ]
+}
+tracks/3/type = "value"
+tracks/3/path = NodePath("Frames/ThrowEnd:visible")
+tracks/3/interp = 1
+tracks/3/loop_wrap = true
+tracks/3/imported = false
+tracks/3/enabled = true
+tracks/3/keys = {
+"times": PoolRealArray( 0 ),
+"transitions": PoolRealArray( 1 ),
+"update": 1,
+"values": [ false ]
+}
+
+[sub_resource type="QuadMesh" id=4]
+size = Vector2( 2, 3.2 )
+
+[sub_resource type="SpatialMaterial" id=5]
+flags_unshaded = true
+params_billboard_mode = 2
+params_use_alpha_scissor = true
+params_alpha_scissor_threshold = 0.98
+albedo_texture = ExtResource( 2 )
+
+[sub_resource type="SpatialMaterial" id=6]
+flags_unshaded = true
+params_billboard_mode = 2
+params_use_alpha_scissor = true
+params_alpha_scissor_threshold = 0.98
+albedo_texture = ExtResource( 3 )
+
+[sub_resource type="SpatialMaterial" id=7]
+flags_unshaded = true
+params_billboard_mode = 2
+params_use_alpha_scissor = true
+params_alpha_scissor_threshold = 0.98
+albedo_texture = ExtResource( 4 )
+
+[sub_resource type="SpatialMaterial" id=8]
+flags_unshaded = true
+params_billboard_mode = 2
+params_use_alpha_scissor = true
+params_alpha_scissor_threshold = 0.98
+albedo_texture = ExtResource( 5 )
+
+[node name="Person" type="KinematicBody" groups=[
+"person",
+]]
+script = ExtResource( 1 )
+
+[node name="CollisionShape" type="CollisionShape" parent="."]
+shape = SubResource( 1 )
+disabled = true
+
+[node name="AnimationPlayer" type="AnimationPlayer" parent="."]
+anims/throw = SubResource( 2 )
+anims/walk = SubResource( 3 )
+
+[node name="Frames" type="Spatial" parent="."]
+
+[node name="WalkLeft" type="MeshInstance" parent="Frames"]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0.317258, 1.55227, 0 )
+visible = false
+mesh = SubResource( 4 )
+material/0 = SubResource( 5 )
+
+[node name="WalkRight" type="MeshInstance" parent="Frames"]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0.317258, 1.55227, 0 )
+visible = false
+mesh = SubResource( 4 )
+material/0 = SubResource( 6 )
+
+[node name="ThrowBegin" type="MeshInstance" parent="Frames"]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0.317258, 1.55227, 0 )
+visible = false
+mesh = SubResource( 4 )
+material/0 = SubResource( 7 )
+
+[node name="ThrowEnd" type="MeshInstance" parent="Frames"]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0.317258, 1.55227, 0 )
+mesh = SubResource( 4 )
+material/0 = SubResource( 8 )

@@ -1,0 +1,221 @@
+[gd_scene load_steps=14 format=2]
+
+[ext_resource path="res://truck/Truck.tscn" type="PackedScene" id=1]
+[ext_resource path="res://road.jpg" type="Texture" id=2]
+[ext_resource path="res://grass.jpg" type="Texture" id=3]
+[ext_resource path="res://truck/Tree.tscn" type="PackedScene" id=4]
+[ext_resource path="res://person/Person.tscn" type="PackedScene" id=5]
+
+[sub_resource type="Curve3D" id=1]
+_data = {
+"points": PoolVector3Array( 0, 0, 0, 0, 0, 0, -0.908957, 0.0473633, 8.31833, -29.283, 0, -25.7335, 29.283, 0, 25.7335, 8.97905, 0, 99.9623, -42.8969, 0, 30.341, 42.8969, 0, -30.341, 111.329, 0, 99.7916, -72.7109, 0, 26.7913, 72.7109, 0, -26.7913, 180.897, 0, -27.2717, -31.8057, 0.00012207, 79.9221, 31.8057, -0.00012207, -79.9221, 176.737, 0.000518799, -196.467, 8.65082, -1.52588e-05, -87.3988, -8.65082, 1.52588e-05, 87.3988, 406.953, 0, 33.7496, -38.1566, 0, -78.0879, 38.1566, 0, 78.0879, 354.163, 0, 209.995, 8.8736, 0, -118.019, -8.8736, 0, 118.019, 450.886, 0, 321.803, 94.4908, 0, 66.4962, -94.4908, 0, -66.4962, -55.7984, 0, 339.55, -29.7401, 0, 119.738, 29.7401, 0, -119.738, -198.207, 0, -4.69034, -25.3032, 0, -27.5644, 25.3032, 0, 27.5644, -15.41, 0, -72.1299, 0, 0, 0, 0, 0, 0, -0.0681057, 0.0454102, 5.55674, 0, 0, 0, 0, 0, 0, -0.943268, 0.0473633, 8.41389 ),
+"tilts": PoolRealArray( 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 )
+}
+
+[sub_resource type="Shader" id=2]
+code = "shader_type spatial; 
+render_mode skip_vertex_transform, unshaded;
+
+uniform vec4 color : hint_color;
+uniform sampler2D albedoTex : hint_albedo;
+uniform float specular_intensity : hint_range(0, 1);
+uniform float resolution = 256;
+uniform float cull_distance = 5;
+uniform vec2 uv_scale = vec2(1.0, 1.0);
+uniform vec2 uv_offset = vec2(.0, .0);
+
+varying vec4 vertex_coordinates;
+
+void vertex() {
+	UV = UV * uv_scale + uv_offset;
+	
+	float vertex_distance = length((MODELVIEW_MATRIX * vec4(VERTEX, 1.0)));
+	
+	VERTEX = (MODELVIEW_MATRIX * vec4(VERTEX, 1.0)).xyz;
+	float vPos_w = (PROJECTION_MATRIX * vec4(VERTEX, 1.0)).w;
+	VERTEX.xy = vPos_w * floor(resolution * VERTEX.xy / vPos_w) / resolution;
+	vertex_coordinates = vec4(UV * VERTEX.z, VERTEX.z, .0);
+	
+	if (vertex_distance > cull_distance)
+		VERTEX = vec3(.0);
+}
+
+void fragment() {
+	vec4 tex = texture(albedoTex, vertex_coordinates.xy / vertex_coordinates.z);
+	
+	ALBEDO = tex.rgb * color.rgb;
+	SPECULAR = specular_intensity;
+}"
+
+[sub_resource type="ShaderMaterial" id=3]
+shader = SubResource( 2 )
+shader_param/color = Color( 1, 1, 1, 1 )
+shader_param/specular_intensity = null
+shader_param/resolution = 256.0
+shader_param/cull_distance = 90.0
+shader_param/uv_scale = Vector2( 1, 1 )
+shader_param/uv_offset = Vector2( 0, 0 )
+shader_param/albedoTex = ExtResource( 2 )
+
+[sub_resource type="PlaneMesh" id=4]
+size = Vector2( 800, 800 )
+subdivide_width = 200
+subdivide_depth = 200
+
+[sub_resource type="Shader" id=5]
+code = "shader_type spatial; 
+render_mode skip_vertex_transform, unshaded;
+
+uniform vec4 color : hint_color;
+uniform sampler2D albedoTex : hint_albedo;
+uniform float specular_intensity : hint_range(0, 1);
+uniform float resolution = 256;
+uniform float cull_distance = 5;
+uniform vec2 uv_scale = vec2(1.0, 1.0);
+uniform vec2 uv_offset = vec2(.0, .0);
+
+varying vec4 vertex_coordinates;
+
+void vertex() {
+	UV = UV * uv_scale + uv_offset;
+	
+	float vertex_distance = length((MODELVIEW_MATRIX * vec4(VERTEX, 1.0)));
+	
+	VERTEX = (MODELVIEW_MATRIX * vec4(VERTEX, 1.0)).xyz;
+	float vPos_w = (PROJECTION_MATRIX * vec4(VERTEX, 1.0)).w;
+	VERTEX.xy = vPos_w * floor(resolution * VERTEX.xy / vPos_w) / resolution;
+	vertex_coordinates = vec4(UV * VERTEX.z, VERTEX.z, .0);
+	
+	if (vertex_distance > cull_distance)
+		VERTEX = vec3(.0);
+}
+
+void fragment() {
+	vec4 tex = texture(albedoTex, vertex_coordinates.xy / vertex_coordinates.z);
+	
+	ALBEDO = tex.rgb * color.rgb;
+	SPECULAR = specular_intensity;
+}"
+
+[sub_resource type="ShaderMaterial" id=6]
+shader = SubResource( 5 )
+shader_param/color = Color( 1, 1, 1, 1 )
+shader_param/specular_intensity = null
+shader_param/resolution = 256.0
+shader_param/cull_distance = 80.0
+shader_param/uv_scale = Vector2( 25, 25 )
+shader_param/uv_offset = Vector2( 0, 0 )
+shader_param/albedoTex = ExtResource( 3 )
+
+[sub_resource type="BoxShape" id=7]
+extents = Vector3( 400, 0.4, 400 )
+
+[sub_resource type="Environment" id=8]
+background_mode = 1
+
+[node name="World" type="Spatial"]
+
+[node name="Truck" parent="." instance=ExtResource( 1 )]
+editor/display_folded = true
+transform = Transform( -4.37114e-08, 0, 1, 0, 1, 0, -1, 0, -4.37114e-08, 56.2453, 0.283339, 119.838 )
+
+[node name="TruckBody" parent="Truck" index="1"]
+editor/display_folded = true
+
+[node name="Track" type="Spatial" parent="."]
+
+[node name="Path" type="Path" parent="Track"]
+curve = SubResource( 1 )
+
+[node name="CSGPolygon" type="CSGPolygon" parent="Track/Path"]
+invert_faces = true
+polygon = PoolVector2Array( -6, 0, -6, 0.1, 6, 0.1, 6, 0 )
+mode = 2
+path_node = NodePath("..")
+path_interval = 8.0
+path_rotation = 2
+path_local = false
+path_continuous_u = false
+path_joined = true
+material = SubResource( 3 )
+
+[node name="Ground" type="MeshInstance" parent="."]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 84.5833, 0, 156.984 )
+mesh = SubResource( 4 )
+material/0 = SubResource( 6 )
+
+[node name="StaticBody" type="StaticBody" parent="Ground"]
+
+[node name="CollisionShape" type="CollisionShape" parent="Ground/StaticBody"]
+shape = SubResource( 7 )
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="."]
+environment = SubResource( 8 )
+
+[node name="Trees" type="Spatial" parent="."]
+
+[node name="Tree" parent="Trees" instance=ExtResource( 4 )]
+transform = Transform( 0.938236, 0, 0.345995, 0, 1, 0, -0.345995, 0, 0.938236, 9, 0.0414267, 16 )
+
+[node name="Tree2" parent="Trees" instance=ExtResource( 4 )]
+transform = Transform( 0.938236, 0, 0.345995, 0, 1, 0, -0.345995, 0, 0.938236, 6.23829, 0.0414267, 28.7426 )
+
+[node name="Tree3" parent="Trees" instance=ExtResource( 4 )]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 9.78917, 0, 43.2295 )
+
+[node name="Tree4" parent="Trees" instance=ExtResource( 4 )]
+transform = Transform( 0.979676, 0, 0.200585, 0, 1, 0, -0.200585, 0, 0.979676, 16.1191, 0, 29.6073 )
+
+[node name="Tree6" parent="Trees" instance=ExtResource( 4 )]
+transform = Transform( -0.807361, 0, 0.590058, 0, 1, 0, -0.590058, 0, -0.807361, 90.3818, 0, 92.5184 )
+
+[node name="Tree17" parent="Trees" instance=ExtResource( 4 )]
+transform = Transform( 0.976108, 0, 0.217287, 0, 1, 0, -0.217287, 0, 0.976108, 77.0345, 1.90735e-06, 129.996 )
+
+[node name="Tree18" parent="Trees" instance=ExtResource( 4 )]
+transform = Transform( 0.999944, 0, 0.0106196, 0, 1, 0, -0.0106196, 0, 0.999944, 53.3471, 1.90735e-06, 135.269 )
+
+[node name="Tree7" parent="Trees" instance=ExtResource( 4 )]
+transform = Transform( -0.807361, 0, 0.590058, 0, 1, 0, -0.590058, 0, -0.807361, 134.402, 0, 90.6987 )
+
+[node name="Tree8" parent="Trees" instance=ExtResource( 4 )]
+transform = Transform( -0.984481, 0, 0.175492, 0, 1, 0, -0.175492, 0, -0.984481, 117.938, 0, 70.5083 )
+
+[node name="Tree9" parent="Trees" instance=ExtResource( 4 )]
+transform = Transform( -0.864014, 0, 0.503467, 0, 1, 0, -0.503467, 0, -0.864014, 176.481, 0, -18.1758 )
+
+[node name="Tree10" parent="Trees" instance=ExtResource( 4 )]
+transform = Transform( -0.864014, 0, 0.503467, 0, 1, 0, -0.503467, 0, -0.864014, 161.2, 0, -38.3477 )
+
+[node name="Tree11" parent="Trees" instance=ExtResource( 4 )]
+transform = Transform( -0.313903, 0, 0.949455, 0, 1, 0, -0.949455, 0, -0.313903, 193.7, 3.8147e-06, -26.3003 )
+
+[node name="Tree12" parent="Trees" instance=ExtResource( 4 )]
+transform = Transform( -0.313903, 0, 0.949455, 0, 1, 0, -0.949455, 0, -0.313903, 195.063, 3.8147e-06, -54.0903 )
+
+[node name="Tree13" parent="Trees" instance=ExtResource( 4 )]
+transform = Transform( -0.813812, 0, 0.581128, 0, 1, 0, -0.581128, 0, -0.813812, 170.455, 3.8147e-06, -50.5672 )
+
+[node name="Tree14" parent="Trees" instance=ExtResource( 4 )]
+transform = Transform( -0.813812, 0, 0.581128, 0, 1, 0, -0.581128, 0, -0.813812, 177.974, 3.8147e-06, -62.5491 )
+
+[node name="Tree15" parent="Trees" instance=ExtResource( 4 )]
+transform = Transform( -0.264816, 0, 0.964299, 0, 1, 0, -0.964299, 0, -0.264816, 218.343, 3.8147e-06, -28.4634 )
+
+[node name="Tree5" parent="Trees" instance=ExtResource( 4 )]
+transform = Transform( 0.979676, 0, 0.200585, 0, 1, 0, -0.200585, 0, 0.979676, 10.8559, 0, 73.8576 )
+
+[node name="Person" parent="." instance=ExtResource( 5 )]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 177, 0, -56 )
+
+[editable path="Truck"]
+
+[editable path="Truck/TruckBody/BodyGraphics"]
+
+[editable path="Truck/TruckBody/VehicleWheelFL/Scene Root"]
+
+[editable path="Truck/TruckBody/VehicleWheelBL/Scene Root2"]
+
+[editable path="Truck/TruckBody/VehicleWheelFR/Scene Root3"]
+
+[editable path="Truck/TruckBody/VehicleWheelBR/Scene Root4"]

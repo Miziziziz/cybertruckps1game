@@ -1,0 +1,21 @@
+[remap]
+
+importer="wav"
+type="AudioStreamSample"
+path="res://.import/engine_noise.wav-6732706755eb6c11e21e1f74df7e5a9f.sample"
+
+[deps]
+
+source_file="res://truck/engine_noise.wav"
+dest_files=[ "res://.import/engine_noise.wav-6732706755eb6c11e21e1f74df7e5a9f.sample" ]
+
+[params]
+
+force/8_bit=false
+force/mono=false
+force/max_rate=false
+force/max_rate_hz=44100
+edit/trim=true
+edit/normalize=true
+edit/loop=true
+compress/mode=0

@@ -1,0 +1,253 @@
+[gd_scene load_steps=13 format=2]
+
+[ext_resource path="res://truck/Truck.gd" type="Script" id=1]
+[ext_resource path="res://truck/body.glb" type="PackedScene" id=2]
+[ext_resource path="res://truck/truck_mat.tres" type="Material" id=3]
+[ext_resource path="res://truck/crack_window.png" type="Texture" id=4]
+[ext_resource path="res://truck/wheel.glb" type="PackedScene" id=5]
+[ext_resource path="res://truck/startaccel.wav" type="AudioStream" id=6]
+[ext_resource path="res://truck/engine_noise.wav" type="AudioStream" id=7]
+
+[sub_resource type="PlaneMesh" id=1]
+size = Vector2( 2, 0.7 )
+
+[sub_resource type="Shader" id=2]
+code = "shader_type spatial; 
+render_mode skip_vertex_transform, cull_disabled, unshaded;
+
+uniform vec4 color : hint_color;
+uniform sampler2D albedoTex : hint_albedo;
+uniform float alpha_scissor_threshold;
+uniform float specular_intensity : hint_range(0, 1);
+uniform float resolution = 256;
+uniform float cull_distance = 5;
+uniform vec2 uv_scale = vec2(1.0, 1.0);
+uniform vec2 uv_offset = vec2(.0, .0);
+
+varying vec4 vertex_coordinates;
+
+void vertex() {
+	UV = UV * uv_scale + uv_offset;
+	
+	float vertex_distance = length((MODELVIEW_MATRIX * vec4(VERTEX, 1.0)));
+	
+	VERTEX = (MODELVIEW_MATRIX * vec4(VERTEX, 1.0)).xyz;
+	float vPos_w = (PROJECTION_MATRIX * vec4(VERTEX, 1.0)).w;
+	VERTEX.xy = vPos_w * floor(resolution * VERTEX.xy / vPos_w) / resolution;
+	vertex_coordinates = vec4(UV * VERTEX.z, VERTEX.z, .0);
+	
+	if (vertex_distance > cull_distance)
+		VERTEX = vec3(.0);
+}
+
+void fragment() {
+	vec4 tex = texture(albedoTex, vertex_coordinates.xy / vertex_coordinates.z);
+	
+	ALBEDO = tex.rgb * color.rgb;
+	SPECULAR = specular_intensity;
+	ALPHA = tex.a;
+	ALPHA_SCISSOR = alpha_scissor_threshold;
+}"
+
+[sub_resource type="ShaderMaterial" id=3]
+shader = SubResource( 2 )
+shader_param/color = Color( 1, 1, 1, 1 )
+shader_param/alpha_scissor_threshold = 0.1
+shader_param/specular_intensity = null
+shader_param/resolution = 256.0
+shader_param/cull_distance = 80.0
+shader_param/uv_scale = Vector2( 1, 1 )
+shader_param/uv_offset = Vector2( 0, 0 )
+shader_param/albedoTex = ExtResource( 4 )
+
+[sub_resource type="BoxShape" id=4]
+extents = Vector3( 1, 0.826024, 3.56041 )
+
+[sub_resource type="Animation" id=5]
+length = 3.0
+tracks/0/type = "value"
+tracks/0/path = NodePath("CamBase/CamHead:translation")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/keys = {
+"times": PoolRealArray( 3 ),
+"transitions": PoolRealArray( 1 ),
+"update": 0,
+"values": [ Vector3( 0.174311, 1.43051e-06, -14.9924 ) ]
+}
+tracks/1/type = "value"
+tracks/1/path = NodePath("CamBase:rotation_degrees")
+tracks/1/interp = 1
+tracks/1/loop_wrap = true
+tracks/1/imported = false
+tracks/1/enabled = true
+tracks/1/keys = {
+"times": PoolRealArray( 0, 3 ),
+"transitions": PoolRealArray( 1, 1 ),
+"update": 0,
+"values": [ Vector3( 10, -180, -3.03163e-13 ), Vector3( 40, 0, 0 ) ]
+}
+tracks/2/type = "value"
+tracks/2/path = NodePath("CamBase/CamHead:rotation_degrees")
+tracks/2/interp = 1
+tracks/2/loop_wrap = true
+tracks/2/imported = false
+tracks/2/enabled = true
+tracks/2/keys = {
+"times": PoolRealArray( 3 ),
+"transitions": PoolRealArray( 1 ),
+"update": 0,
+"values": [ Vector3( -1.70105e-06, 175, 0 ) ]
+}
+tracks/3/type = "value"
+tracks/3/path = NodePath("EngineStartNoise:playing")
+tracks/3/interp = 1
+tracks/3/loop_wrap = true
+tracks/3/imported = false
+tracks/3/enabled = true
+tracks/3/keys = {
+"times": PoolRealArray( 0 ),
+"transitions": PoolRealArray( 1 ),
+"update": 1,
+"values": [ false ]
+}
+tracks/4/type = "value"
+tracks/4/path = NodePath("EngineNoise:playing")
+tracks/4/interp = 1
+tracks/4/loop_wrap = true
+tracks/4/imported = false
+tracks/4/enabled = true
+tracks/4/keys = {
+"times": PoolRealArray( 0 ),
+"transitions": PoolRealArray( 1 ),
+"update": 1,
+"values": [ false ]
+}
+
+[node name="Truck" type="Spatial"]
+
+[node name="InterpolatedCamera" type="InterpolatedCamera" parent="."]
+transform = Transform( -1, 3.78925e-15, -1.50996e-07, -5.2108e-15, 1, 5.96046e-08, 1.50996e-07, 5.96046e-08, -1, 0, 1, 0 )
+target = NodePath("../TruckBody/CamBase/CamHead")
+speed = 3.0
+enabled = true
+
+[node name="TruckBody" type="VehicleBody" parent="."]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0 )
+axis_lock_angular_x = true
+axis_lock_angular_z = true
+linear_damp = 0.6
+script = ExtResource( 1 )
+turn_speed = 40.0
+max_turn_angle = 20.0
+accel_speed = 500.0
+max_accel = 300
+
+[node name="CamBase" type="Spatial" parent="TruckBody"]
+editor/display_folded = true
+transform = Transform( -1, -2.62201e-08, -1.48702e-07, -5.2108e-15, 0.984808, -0.173648, 1.50996e-07, -0.173648, -0.984808, 0, 0, 0 )
+
+[node name="CamHead" type="Position3D" parent="TruckBody/CamBase"]
+transform = Transform( -0.996195, -2.58756e-09, 0.0871556, 0, 1, 2.96889e-08, -0.0871556, 2.95759e-08, -0.996195, 0.174311, 1.43051e-06, -14.9924 )
+
+[node name="BodyGraphics" parent="TruckBody" instance=ExtResource( 2 )]
+editor/display_folded = true
+
+[node name="TruckBody" parent="TruckBody/BodyGraphics" index="0"]
+material/0 = ExtResource( 3 )
+
+[node name="CrackedWindow" type="MeshInstance" parent="TruckBody/BodyGraphics"]
+transform = Transform( 0.0564862, 0.843959, 0.533425, -0.0194825, 0.535108, -0.844559, -0.998213, 0.0373135, 0.0466687, 1.12247, 0.718239, 0.285099 )
+visible = false
+mesh = SubResource( 1 )
+material/0 = SubResource( 3 )
+
+[node name="CollisionShape" type="CollisionShape" parent="TruckBody"]
+shape = SubResource( 4 )
+
+[node name="VehicleWheelFL" type="VehicleWheel" parent="TruckBody"]
+editor/display_folded = true
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 1.1859, -0.551379, 2.50634 )
+use_as_traction = true
+use_as_steering = true
+wheel_radius = 0.58
+wheel_rest_length = 0.07
+suspension_travel = 0.07
+suspension_stiffness = 70.0
+damping_compression = 0.5
+
+[node name="Scene Root" parent="TruckBody/VehicleWheelFL" instance=ExtResource( 5 )]
+
+[node name="Wheel" parent="TruckBody/VehicleWheelFL/Scene Root" index="0"]
+material/0 = ExtResource( 3 )
+
+[node name="VehicleWheelBL" type="VehicleWheel" parent="TruckBody"]
+editor/display_folded = true
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 1.1859, -0.551379, -2.37202 )
+use_as_traction = true
+wheel_radius = 0.58
+wheel_rest_length = 0.07
+suspension_travel = 0.07
+suspension_stiffness = 70.0
+damping_compression = 0.5
+
+[node name="Scene Root2" parent="TruckBody/VehicleWheelBL" instance=ExtResource( 5 )]
+
+[node name="Wheel" parent="TruckBody/VehicleWheelBL/Scene Root2" index="0"]
+material/0 = ExtResource( 3 )
+
+[node name="VehicleWheelFR" type="VehicleWheel" parent="TruckBody"]
+editor/display_folded = true
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, -1.186, -0.551, 2.506 )
+use_as_traction = true
+use_as_steering = true
+wheel_radius = 0.58
+wheel_rest_length = 0.07
+suspension_travel = 0.07
+suspension_stiffness = 70.0
+damping_compression = 0.5
+
+[node name="Scene Root3" parent="TruckBody/VehicleWheelFR" instance=ExtResource( 5 )]
+transform = Transform( -1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0 )
+
+[node name="Wheel" parent="TruckBody/VehicleWheelFR/Scene Root3" index="0"]
+material/0 = ExtResource( 3 )
+
+[node name="VehicleWheelBR" type="VehicleWheel" parent="TruckBody"]
+editor/display_folded = true
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, -1.186, -0.551, -2.37236 )
+use_as_traction = true
+wheel_radius = 0.58
+wheel_rest_length = 0.07
+suspension_travel = 0.07
+suspension_stiffness = 70.0
+damping_compression = 0.5
+
+[node name="Scene Root4" parent="TruckBody/VehicleWheelBR" instance=ExtResource( 5 )]
+transform = Transform( -1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0 )
+
+[node name="Wheel" parent="TruckBody/VehicleWheelBR/Scene Root4" index="0"]
+material/0 = ExtResource( 3 )
+
+[node name="AnimationPlayer" type="AnimationPlayer" parent="TruckBody"]
+autoplay = "load_in"
+anims/load_in = SubResource( 5 )
+
+[node name="EngineStartNoise" type="AudioStreamPlayer" parent="TruckBody"]
+stream = ExtResource( 6 )
+
+[node name="EngineNoise" type="AudioStreamPlayer" parent="TruckBody"]
+stream = ExtResource( 7 )
+volume_db = -10.0
+
+[editable path="TruckBody/BodyGraphics"]
+
+[editable path="TruckBody/VehicleWheelFL/Scene Root"]
+
+[editable path="TruckBody/VehicleWheelBL/Scene Root2"]
+
+[editable path="TruckBody/VehicleWheelFR/Scene Root3"]
+
+[editable path="TruckBody/VehicleWheelBR/Scene Root4"]
